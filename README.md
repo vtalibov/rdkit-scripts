@@ -1,6 +1,16 @@
 # pySMCM
 
-A python script to calculate Synthethic Molecular Complexity Metrics (SMCM) descriptor, described by Allu&Oprea, *J. Chem. Inf. Model., 2005, 45, 1237-1243*.
+[RDKit](http://www.rdkit.org/)-based Python script that calculates Synthethic Molecular Complexity Metrics (SMCM) descriptor, described by Allu&Oprea, *J. Chem. Inf. Model., 2005, 45, 1237-1243*.
+
+### Example
+
+```python
+>>> from rdkit import Chem
+>>> from pySMCM import smcm_score
+>>> mol = Chem.MolFromSmiles('CC(C)[C@@H](C(=O)N1CC2(CC2)C[C@H]1C3=NC=C(N3)C4=CC5=C(C=C4)C6=C(C5(F)F)C=C(C=C6)C7=CC8=C(C=C7)N=C(N8)[C@@H]9[C@H]1CC[C@H](C1)N9C(=O)[C@H](C(C)C)NC(=O)OC)NC(=O)OC')
+>>> smcm_score(mol)
+130.51100000000002
+```
 
 ### References
 
