@@ -56,57 +56,6 @@ def rings_shared_atoms(mol):
     return shared_atoms
 
 
-# def ring_score(mol):
-#     '''Perfomns ring assignment and returns
-#     ring systems-dependent part of SMCM.
-#     Additive model.'''
-#     score = 0
-#     rings = ring_atoms(mol)
-#     for ring in rings:
-#         two = [3, 4, 7, 8, 9]
-#         if len(ring) in two:
-#             score += 2
-#         else:
-#             score += 1
-#     shared_atoms = rings_shared_atoms(mol)
-#     for shared in shared_atoms:
-#         if len(shared) == 1:    # spiro
-#             score += 3
-#         elif len(shared) == 2:  # fused
-#             score += 2
-#         elif len(shared) > 2:   # bridge head
-#             score += 4
-#     return score
-
-
-# def ring_score(mol):
-#     '''Perfomns ring assignment and returns
-#     ring systems-dependent part of SMCM.
-#     Multiplicative model with one significant
-#     junction.'''
-#     rings = ring_atoms(mol)
-#     shared_atoms = rings_shared_atoms(mol)
-#     simple_rings = [5, 6]   # penta-and hexaatomic ring systems
-#     score = 0
-#     for ring in rings:
-#         junction_coef = 1
-#         if len(ring) in simple_rings:
-#             ring_coef = 1
-#         else:
-#             ring_coef = 2
-#         # only the first instance of junction is significant.
-#         for shared in shared_atoms:
-#             if shared.issubset(ring):
-#                 if len(shared) == 1:    # Spiro
-#                     junction_coef = 3
-#                 elif len(shared) == 2:
-#                     junction_coef = 2   # Fused
-#                 elif len(shared) > 2:
-#                     junction_coef = 4   # Bridged
-#         score += ring_coef * junction_coef
-#     return score
-
-
 def ring_score(mol):
     '''Perfomns ring assignment and returns
     ring systems-dependent part of SMCM.
