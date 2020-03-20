@@ -55,12 +55,11 @@ def rings_shared_atoms(mol):
         del atoms[atoms.index(ring1)]
     return shared_atoms
 
-# Two ring_score functions. The first (commented) calculates the score
-# additively. Not sure if it is correct way.
 
 # def ring_score(mol):
 #     '''Perfomns ring assignment and returns
-#     ring systems-dependent part of SMCM.'''
+#     ring systems-dependent part of SMCM.
+#     Additive model.'''
 #     score = 0
 #     rings = ring_atoms(mol)
 #     for ring in rings:
@@ -80,29 +79,60 @@ def rings_shared_atoms(mol):
 #     return score
 
 
+# def ring_score(mol):
+#     '''Perfomns ring assignment and returns
+#     ring systems-dependent part of SMCM.
+#     Multiplicative model with one significant
+#     junction.'''
+#     rings = ring_atoms(mol)
+#     shared_atoms = rings_shared_atoms(mol)
+#     simple_rings = [5, 6]   # penta-and hexaatomic ring systems
+#     score = 0
+#     for ring in rings:
+#         junction_coef = 1
+#         if len(ring) in simple_rings:
+#             ring_coef = 1
+#         else:
+#             ring_coef = 2
+#         # only the first instance of junction is significant.
+#         for shared in shared_atoms:
+#             if shared.issubset(ring):
+#                 if len(shared) == 1:    # Spiro
+#                     junction_coef = 3
+#                 elif len(shared) == 2:
+#                     junction_coef = 2   # Fused
+#                 elif len(shared) > 2:
+#                     junction_coef = 4   # Bridged
+#         score += ring_coef * junction_coef
+#     return score
+
+
 def ring_score(mol):
     '''Perfomns ring assignment and returns
-    ring systems-dependent part of SMCM.'''
+    ring systems-dependent part of SMCM.
+    Multiplicative model with all junctions'''
     rings = ring_atoms(mol)
     shared_atoms = rings_shared_atoms(mol)
     simple_rings = [5, 6]   # penta-and hexaatomic ring systems
     score = 0
     for ring in rings:
-        junction_coef = 1
+        junction_coefs = list()
         if len(ring) in simple_rings:
             ring_coef = 1
         else:
             ring_coef = 2
-        # only the first instance of junction is significant.
+        # all junctions contribute to the ring
         for shared in shared_atoms:
             if shared.issubset(ring):
-                if len(shared) == 1:    # Spiro
-                    junction_coef = 3
-                elif len(shared) == 2:
-                    junction_coef = 2   # Fused
-                elif len(shared) > 2:
-                    junction_coef = 4   # Bridged
-        score += ring_coef * junction_coef
+                if len(shared) == 1:            # Spiro
+                    junction_coefs.append(3)
+                elif len(shared) == 2:          # Fused
+                    junction_coefs.append(2)
+                elif len(shared) > 2:           # Bridged
+                    junction_coefs.append(4)
+        if len(junction_coefs) == 0:
+            junction_coefs.append(1)
+        score += ring_coef * sum(junction_coefs)
     return score
 
 
