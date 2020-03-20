@@ -111,4 +111,9 @@ def smcm_score(mol, file='SMCM_values.txt'):
     Molecular Complexity Metric (SMCM) descriptor,
     similar to described by Allu and Oprea in
     J. Chem. Inf. Model, 2005, 45, 1237-1243.'''
-    return en_score(mol, file)+ring_score(mol)
+    return en_score(mol, file) + ring_score(mol)
+
+
+if __name__ == '__main__':
+    import sys
+    print(smcm_score(Chem.MolFromSmiles(sys.argv[1])))
