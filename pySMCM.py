@@ -13,23 +13,6 @@ def txt_to_list(file):
     return list_out
 
 
-def ring_atoms(mol):
-    rings = mol.GetRingInfo()
-    return [set(a) for a in rings.AtomRings()]
-
-
-def rings_shared_atoms(mol):
-    shared_atoms = []
-    atoms = ring_atoms(mol)
-    for ring1 in atoms:
-        for ring2 in atoms:
-            shared = ring1.intersection(ring2)
-            if ring1 != ring2 and len(shared) != 0:
-                if shared not in shared_atoms:
-                    shared_atoms.append(shared)
-    return shared_atoms
-
-
 def prepare_smcm_en_values(file):
     '''Reads multiple files with SMART patterns
     and corresponding SMCM scores, returns pandas
@@ -53,25 +36,73 @@ def en_score(mol, file='SMCM_values.txt'):
     return score
 
 
+def ring_atoms(mol):
+    '''Returns sets of ring system atoms.'''
+    rings = mol.GetRingInfo()
+    return [set(a) for a in rings.AtomRings()]
+
+
+def rings_shared_atoms(mol):
+    '''Returns sets of atoms, shared between two ring system.'''
+    shared_atoms = []
+    atoms = ring_atoms(mol)
+    for ring1 in atoms:
+        for ring2 in atoms:
+            shared = ring1.intersection(ring2)
+            if ring1 != ring2 and len(shared) != 0:
+                if shared not in shared_atoms:
+                    shared_atoms.append(shared)
+        del atoms[atoms.index(ring1)]
+    return shared_atoms
+
+# Two ring_score functions. The first (commented) calculates the score
+# additively. Not sure if it is correct way.
+
+# def ring_score(mol):
+#     '''Perfomns ring assignment and returns
+#     ring systems-dependent part of SMCM.'''
+#     score = 0
+#     rings = ring_atoms(mol)
+#     for ring in rings:
+#         two = [3, 4, 7, 8, 9]
+#         if len(ring) in two:
+#             score += 2
+#         else:
+#             score += 1
+#     shared_atoms = rings_shared_atoms(mol)
+#     for shared in shared_atoms:
+#         if len(shared) == 1:    # spiro
+#             score += 3
+#         elif len(shared) == 2:  # fused
+#             score += 2
+#         elif len(shared) > 2:   # bridge head
+#             score += 4
+#     return score
+
+
 def ring_score(mol):
     '''Perfomns ring assignment and returns
     ring systems-dependent part of SMCM.'''
-    score = 0
     rings = ring_atoms(mol)
-    for ring in rings:
-        two = [3, 4, 7, 8, 9]
-        if len(ring) in two:
-            score += 2
-        else:
-            score += 1
     shared_atoms = rings_shared_atoms(mol)
-    for shared in shared_atoms:
-        if len(shared) == 1:    # spiro
-            score += 3
-        elif len(shared) == 2:  # fused
-            score = score + 2
-        elif len(shared) > 2:   # bridge head
-            score = score + 4
+    simple_rings = [5, 6]   # penta-and hexaatomic ring systems
+    score = 0
+    for ring in rings:
+        junction_coef = 1
+        if len(ring) in simple_rings:
+            ring_coef = 1
+        else:
+            ring_coef = 2
+        # only the first instance of junction is significant.
+        for shared in shared_atoms:
+            if shared.issubset(ring):
+                if len(shared) == 1:    # Spiro
+                    junction_coef = 3
+                elif len(shared) == 2:
+                    junction_coef = 2   # Fused
+                elif len(shared) > 2:
+                    junction_coef = 4   # Bridged
+        score += ring_coef * junction_coef
     return score
 
 
