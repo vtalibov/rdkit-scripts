@@ -1,11 +1,16 @@
 import pandas as pd
 from rdkit import Chem
+from pathlib import Path
 
+
+def filein(filename):
+    parental = Path(__file__).parent
+    return parental/filename
 
 def txt_to_list(file):
     '''Reads .txt file, returns a list of strings.'''
     list_out = []
-    for line in open(file):
+    for line in open(filein(file)):
         if line[-1] == '\n':
             list_out.append(line.replace('\n',""))
         else:
@@ -19,13 +24,13 @@ def prepare_smcm_en_values(file):
     dataframe with rdkit.Mol objects and SMCM scores.'''
     smcm_scores = pd.DataFrame()
     for fin in txt_to_list(file):
-        smcm_scores = pd.concat([smcm_scores, pd.read_csv(fin, header=None)],
+        smcm_scores = pd.concat([smcm_scores, pd.read_csv(filein(fin), header=None)],
                                 ignore_index=True)
     smcm_scores[0] = [Chem.MolFromSmarts(entry) for entry in smcm_scores[0]]
     return smcm_scores
 
 
-def en_score(mol, file='SMCM_values.txt'):
+def en_score(mol, file):
     '''Calculates elecronegativity-based part of SMCM'''
     smcm_scores = prepare_smcm_en_values(file)
     score = 0
@@ -86,13 +91,15 @@ def ring_score(mol):
 
 
 def smcm_score(mol, file='SMCM_values.txt'):
-    '''Takes RDKit mol object and returns Synthethic
-    Molecular Complexity Metric (SMCM) descriptor,
-    similar to described by Allu and Oprea in
+    '''Takes RDKit mol object or SMILES string
+    and quantifies Synthethic Molecular
+    Complexity Metrics (SMCM).
     J. Chem. Inf. Model, 2005, 45, 1237-1243.'''
+    if type(mol) is str:
+        mol = Chem.MolFromSmiles(mol)
     return en_score(mol, file) + ring_score(mol)
 
 
 if __name__ == '__main__':
     import sys
-    print(smcm_score(Chem.MolFromSmiles(sys.argv[1])))
+    print(smcm_score(sys.argv[1]))
