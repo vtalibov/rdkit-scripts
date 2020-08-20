@@ -35,6 +35,8 @@ def converged_conformers(mol, energies, cutoff=10):
 
 
 def average_PMIscore(mol, cutoff=10):
+    if type(mol) is str:
+        mol = Chem.AddHs(Chem.MolFromSmiles(mol))
     mol = mmff_opt_confs(mol)
     mol = converged_conformers(mol[0], mol[1])
     NPR1 = list()
@@ -48,4 +50,4 @@ def average_PMIscore(mol, cutoff=10):
 
 if __name__ == '__main__':
     import sys
-    print(average_PMIscore(Chem.AddHs(Chem.MolFromSmiles(sys.argv[1]))))
+    print(average_PMIscore(sys.argv[1]))
