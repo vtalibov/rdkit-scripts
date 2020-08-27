@@ -2,19 +2,24 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors3D
 
 
-def embed_confs(mol, seed=0):
+def embed_confs(mol, seed=10, numConfs=27):
     ''' Embeds multiple conformations to a molecule,
-    returns a list of conformation IDs
+    returns a list of conformation IDs. If the molecule
+    is given as a SMILES string, rdkit.mol object is
+    created and hydrated.
     '''
-    conformers = AllChem.EmbedMultipleConfs(mol, pruneRmsThresh=0.5, numConfs=27, randomSeed=seed)
+    if type(mol) is str:
+        mol = Chem.AddHs(Chem.MolFromSmiles(mol), addCoords=True)
+
+    conformers = AllChem.EmbedMultipleConfs(mol, pruneRmsThresh=0.5, numConfs=numConfs, randomSeed=seed)
     return list(conformers)
 
 
-def mmff_opt_confs(mol, seed=0):
+def mmff_opt_confs(mol, seed=10, numConfs=27):
     ''' Performes MMFF'94 optiomization of embed conformations,
     returns convergence and absolute energy value.
     '''
-    embed_confs(mol, seed)
+    embed_confs(mol, seed, numConfs)
     energies = Chem.rdForceFieldHelpers.MMFFOptimizeMoleculeConfs(mol)
     return mol, energies
 
