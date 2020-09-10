@@ -27,13 +27,13 @@ def mmff_opt_confs(mol, seed=10, numConfs=27):
 def converged_conformers(mol, energies, cutoff=10):
     '''Purges unconverged FF-optimized conformers,
     returns mol and a table with conformer ID and its
-     energy relative to the most lost energy conformer.
+     relative minimized energy.
     (rdchem.Mol, [(confID, energy),...])
     '''
     conf_n_energies = list()
     for i in range(len(energies)):
-        if energies[i][0] == 0 and energies[i][1] - min(energies)[1] < cutoff:
-            conf_n_energies.append((i, energies[i][1] - min(energies)[1]))
+        if energies[i][0] == 0 and (energies[i][1] - min(energies)[1]) <= cutoff:
+            conf_n_energies.append((i, (energies[i][1] - min(energies)[1])))
         else:
             mol.RemoveConformer(i)
     return mol, conf_n_energies
@@ -43,7 +43,7 @@ def average_PMIscore(mol, cutoff=10):
     if type(mol) is str:
         mol = Chem.AddHs(Chem.MolFromSmiles(mol))
     mol = mmff_opt_confs(mol)
-    mol = converged_conformers(mol[0], mol[1])
+    mol = converged_conformers(mol[0], mol[1], cutoff)
     NPR1 = list()
     NPR2 = list()
     for i in range(mol[0].GetNumConformers()):
